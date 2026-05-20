@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>T20 Live Cricket Scoreboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- Confetti -->
+  <div id="confetti-container"></div>
+
+  <!-- Stadium BG -->
+  <div class="stadium-bg">
+    <div class="stadium-lights"></div>
+    <div class="pitch-overlay"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TOSS MODAL
+  ══════════════════════════════════════ -->
+  <div id="toss-modal" class="modal-overlay">
+    <div class="toss-card">
+      <div class="toss-coin-wrap">
+        <div class="toss-coin" id="toss-coin">
+          <div class="coin-front">🏏</div>
+          <div class="coin-back">🏆</div>
+        </div>
+      </div>
+      <h1 class="toss-title">T20 LIVE</h1>
+      <p class="toss-subtitle">Cricket Scoreboard</p>
+      <div id="toss-result" class="toss-result hidden"></div>
+      <button id="toss-btn" class="btn-toss">TOSS THE COIN</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MAIN APP
+  ══════════════════════════════════════ -->
+  <div id="main-app" class="hidden">
+
+    <!-- ── TOP HEADER ── -->
+    <header class="top-header">
+      <div class="header-left">
+        <span class="match-type-badge">T20 INTERNATIONAL</span>
+        <span class="match-venue">Narendra Modi Stadium, Ahmedabad</span>
+      </div>
+      <div class="header-center">
+        <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      </div>
+      <div class="header-right">
+        <span id="match-status-text">Match Starting</span>
+      </div>
+    </header>
+
+    <!-- ── SCOREBOARD HERO (always visible) ── -->
+    <section class="scoreboard-hero">
+      <div class="team-block">
+        <div class="team-flag" id="team-a-flag">🇮🇳</div>
+        <div class="team-name" id="team-a-name">INDIA</div>
+        <div class="team-score">
+          <span class="runs" id="score-a-runs">0</span>
+          <span class="sep">/</span>
+          <span class="wkts" id="score-a-wkts">0</span>
+        </div>
+        <div class="team-overs" id="team-a-overs">(0.0)</div>
+      </div>
+
+      <div class="vs-block">
+        <div class="vs-text">VS</div>
+        <div class="match-info-center">
+          <div class="info-row" id="target-row" style="display:none">
+            <span class="info-label">TARGET</span>
+            <span class="info-val" id="target-val">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">CRR</span>
+            <span class="info-val" id="crr-val">0.00</span>
+          </div>
+          <div class="info-row" id="rrr-row" style="display:none">
+            <span class="info-label">RRR</span>
+            <span class="info-val" id="rrr-val">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">INNINGS</span>
+            <span class="info-val" id="innings-val">1st</span>
+          </div>
+        </div>
+        <div class="toss-info" id="toss-info-text"></div>
+      </div>
+
+      <div class="team-block">
+        <div class="team-flag" id="team-b-flag">🇦🇺</div>
+        <div class="team-name" id="team-b-name">AUSTRALIA</div>
+        <div class="team-score">
+          <span class="runs" id="score-b-runs">—</span>
+          <span class="sep" id="score-b-sep" style="display:none">/</span>
+          <span class="wkts" id="score-b-wkts"></span>
+        </div>
+        <div class="team-overs" id="team-b-overs"></div>
+      </div>
+    </section>
+
+    <!-- ── THIS OVER BALLS (always visible) ── -->
+    <section class="last-over-section">
+      <div class="last-over-label">THIS OVER</div>
+      <div class="balls-row" id="balls-row"></div>
+      <div class="over-runs-label">OVER: <span id="over-runs-span">0</span></div>
+    </section>
+
+    <!-- ── WIN PROBABILITY (always visible) ── -->
+    <section class="win-prob-section">
+      <div class="win-prob-label">
+        <span id="wp-team-a-label">INDIA</span>
+        <span id="wp-pct-a">50%</span>
+      </div>
+      <div class="win-prob-bar">
+        <div class="wp-fill-a" id="wp-fill-a" style="width:50%"></div>
+        <div class="wp-fill-b" id="wp-fill-b" style="width:50%"></div>
+      </div>
+      <div class="win-prob-label">
+        <span id="wp-pct-b">50%</span>
+        <span id="wp-team-b-label">AUSTRALIA</span>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         5 TABS NAV BAR
+    ══════════════════════════════════════ -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" data-tab="live">
+        <span class="tab-icon">📡</span>
+        <span class="tab-label">LIVE SCORE</span>
+      </button>
+      <button class="tab-btn" data-tab="scorecard">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">SCORECARD</span>
+      </button>
+      <button class="tab-btn" data-tab="commentary">
+        <span class="tab-icon">🎙️</span>
+        <span class="tab-label">COMMENTARY</span>
+      </button>
+      <button class="tab-btn" data-tab="stats">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">STATS</span>
+      </button>
+      <button class="tab-btn" data-tab="squad">
+        <span class="tab-icon">👥</span>
+        <span class="tab-label">SQUAD</span>
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         TAB 1 — LIVE SCORE
+    ══════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-live">
+      <div class="main-grid">
+
+        <div class="left-panel">
+          <!-- BATTING -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🏏</span>
+              <span class="card-title">BATTING</span>
+              <span class="card-sub" id="batting-team-name"></span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BATSMAN</th>
+                  <th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
+                </tr>
+              </thead>
+              <tbody id="batting-tbody">
+                <tr><td colspan="6" class="empty-row">Match not started</td></tr>
+              </tbody>
+            </table>
+            <div class="partnership-row">
+              <span class="part-label">PARTNERSHIP</span>
+              <span id="partnership-val">0 (0)</span>
+            </div>
+          </div>
+
+          <!-- BOWLING -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🎯</span>
+              <span class="card-title">BOWLING</span>
+              <span class="card-sub" id="bowling-team-name"></span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BOWLER</th>
+                  <th>O</th><th>R</th><th>W</th><th>ECO</th><th>M</th>
+                </tr>
+              </thead>
+              <tbody id="bowling-tbody">
+                <tr><td colspan="6" class="empty-row">Match not started</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <!-- WORM GRAPH -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📈</span>
+              <span class="card-title">OVER BY OVER WORM</span>
+            </div>
+            <div class="worm-container">
+              <canvas id="worm-canvas" width="400" height="140"></canvas>
+            </div>
+          </div>
+
+          <!-- RRR METER -->
+          <div class="card" id="rrr-meter-card" style="display:none">
+            <div class="card-header">
+              <span class="card-icon">⚡</span>
+              <span class="card-title">RUN RATE METER</span>
+            </div>
+            <div class="rrr-meter-wrap">
+              <div class="rrr-arc-container">
+                <svg viewBox="0 0 200 110" class="rrr-svg">
+                  <path d="M10,100 A90,90 0 0,1 190,100" stroke="#1a2a3a" stroke-width="16" fill="none"/>
+                  <path d="M10,100 A90,90 0 0,1 190,100" stroke="url(#rrrGrad)" stroke-width="16" fill="none"
+                        stroke-dasharray="283" stroke-dashoffset="283" id="rrr-arc" stroke-linecap="round"/>
+                  <defs>
+                    <linearGradient id="rrrGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#00ff88"/>
+                      <stop offset="50%" style="stop-color:#ffcc00"/>
+                      <stop offset="100%" style="stop-color:#ff4444"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="rrr-center-text">
+                  <div class="rrr-big" id="rrr-big">0.0</div>
+                  <div class="rrr-small">REQ. RR</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PARTNERSHIP TRACKER -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">🤝</span>
+              <span class="card-title">PARTNERSHIPS</span>
+            </div>
+            <div id="partnership-list" class="partnership-list">
+              <div class="empty-row">No partnerships yet</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-live -->
+
+    <!-- ══════════════════════════════════════
+         TAB 2 — SCORECARD
+    ══════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-scorecard">
+      <div class="tab-content-wrap">
+
+        <!-- INNINGS TOGGLE -->
+        <div class="innings-toggle">
+          <button class="inn-btn active" id="inn-btn-1" onclick="showInnScorecard(1)">1ST INNINGS</button>
+          <button class="inn-btn"        id="inn-btn-2" onclick="showInnScorecard(2)">2ND INNINGS</button>
+        </div>
+
+        <!-- INN 1 SCORECARD -->
+        <div id="sc-inn1">
+          <div class="card sc-card">
+            <div class="card-header">
+              <span class="card-icon">🏏</span>
+              <span class="card-title">BATTING</span>
+              <span class="card-sub" id="sc-inn1-bat-team">—</span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BATSMAN</th>
+                  <th>STATUS</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
+                </tr>
+              </thead>
+              <tbody id="sc-inn1-bat-tbody">
+                <tr><td colspan="7" class="empty-row">Innings not started</td></tr>
+              </tbody>
+            </table>
+            <div class="sc-extras-row" id="sc-inn1-extras">Extras: 0</div>
+            <div class="sc-total-row"  id="sc-inn1-total">Total: 0/0 (0.0 ov)</div>
+          </div>
+
+          <div class="card sc-card">
+            <div class="card-header">
+              <span class="card-icon">🎯</span>
+              <span class="card-title">BOWLING</span>
+              <span class="card-sub" id="sc-inn1-bowl-team">—</span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BOWLER</th>
+                  <th>O</th><th>M</th><th>R</th><th>W</th><th>ECO</th><th>WD</th><th>NB</th>
+                </tr>
+              </thead>
+              <tbody id="sc-inn1-bowl-tbody">
+                <tr><td colspan="8" class="empty-row">Innings not started</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- INN 2 SCORECARD -->
+        <div id="sc-inn2" style="display:none">
+          <div class="card sc-card">
+            <div class="card-header">
+              <span class="card-icon">🏏</span>
+              <span class="card-title">BATTING</span>
+              <span class="card-sub" id="sc-inn2-bat-team">—</span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BATSMAN</th>
+                  <th>STATUS</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
+                </tr>
+              </thead>
+              <tbody id="sc-inn2-bat-tbody">
+                <tr><td colspan="7" class="empty-row">Innings not started</td></tr>
+              </tbody>
+            </table>
+            <div class="sc-extras-row" id="sc-inn2-extras">Extras: 0</div>
+            <div class="sc-total-row"  id="sc-inn2-total">Total: 0/0 (0.0 ov)</div>
+          </div>
+
+          <div class="card sc-card">
+            <div class="card-header">
+              <span class="card-icon">🎯</span>
+              <span class="card-title">BOWLING</span>
+              <span class="card-sub" id="sc-inn2-bowl-team">—</span>
+            </div>
+            <table class="score-table">
+              <thead>
+                <tr>
+                  <th class="col-name">BOWLER</th>
+                  <th>O</th><th>M</th><th>R</th><th>W</th><th>ECO</th><th>WD</th><th>NB</th>
+                </tr>
+              </thead>
+              <tbody id="sc-inn2-bowl-tbody">
+                <tr><td colspan="8" class="empty-row">Innings not started</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-scorecard -->
+
+    <!-- ══════════════════════════════════════
+         TAB 3 — COMMENTARY
+    ══════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-commentary">
+      <div class="tab-content-wrap">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">🎙️</span>
+            <span class="card-title">BALL BY BALL COMMENTARY</span>
+          </div>
+          <div class="comm-filter-bar">
+            <button class="comm-filter active" onclick="filterComm(this,'all')">ALL</button>
+            <button class="comm-filter"        onclick="filterComm(this,'four')">🔥 FOURS</button>
+            <button class="comm-filter"        onclick="filterComm(this,'six')">🚀 SIXES</button>
+            <button class="comm-filter"        onclick="filterComm(this,'wicket')">🥎 WICKETS</button>
+            <button class="comm-filter"        onclick="filterComm(this,'info')">📋 MILESTONES</button>
+          </div>
+          <div class="commentary-feed commentary-feed-full" id="commentary-feed">
+            <div class="commentary-item placeholder-comm">
+              <span class="ball-icon">🏏</span>
+              Welcome to T20 Live! Press START MATCH to begin.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-commentary -->
+
+    <!-- ══════════════════════════════════════
+         TAB 4 — STATS
+    ══════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-stats">
+      <div class="tab-content-wrap">
+
+        <div class="stats-grid">
+          <div class="card stat-card">
+            <div class="card-header">
+              <span class="card-icon">🏏</span>
+              <span class="card-title">TOP SCORER</span>
+            </div>
+            <div class="stat-performer" id="stat-top-scorer">
+              <div class="perf-name">—</div>
+              <div class="perf-val">—</div>
+              <div class="perf-sub">—</div>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="card-header">
+              <span class="card-icon">🎯</span>
+              <span class="card-title">TOP WICKET TAKER</span>
+            </div>
+            <div class="stat-performer" id="stat-top-bowler">
+              <div class="perf-name">—</div>
+              <div class="perf-val">—</div>
+              <div class="perf-sub">—</div>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="card-header">
+              <span class="card-icon">🚀</span>
+              <span class="card-title">MOST SIXES</span>
+            </div>
+            <div class="stat-performer" id="stat-most-sixes">
+              <div class="perf-name">—</div>
+              <div class="perf-val">—</div>
+              <div class="perf-sub">—</div>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="card-header">
+              <span class="card-icon">🔒</span>
+              <span class="card-title">BEST ECONOMY</span>
+            </div>
+            <div class="stat-performer" id="stat-best-eco">
+              <div class="perf-name">—</div>
+              <div class="perf-val">—</div>
+              <div class="perf-sub">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-title">OVER BY OVER BREAKDOWN</span>
+          </div>
+          <div class="over-table-wrap">
+            <table class="score-table over-breakdown-table">
+              <thead>
+                <tr>
+                  <th>OVER</th>
+                  <th id="ov-team-a-hd">TEAM A</th>
+                  <th id="ov-team-b-hd">TEAM B</th>
+                </tr>
+              </thead>
+              <tbody id="over-breakdown-tbody">
+                <tr><td colspan="3" class="empty-row">Match not started</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-header">
+            <span class="card-icon">⚡</span>
+            <span class="card-title">MATCH SUMMARY</span>
+          </div>
+          <div class="summary-bars" id="summary-bars">
+            <div class="empty-row">Match not started</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-stats -->
+
+    <!-- ══════════════════════════════════════
+         TAB 5 — SQUAD
+    ══════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-squad">
+      <div class="tab-content-wrap">
+
+        <div class="card sc-card">
+          <div class="card-header">
+            <span class="card-icon" id="squad-a-flag">🇮🇳</span>
+            <span class="card-title" id="squad-a-name">INDIA SQUAD</span>
+          </div>
+          <div class="squad-grid" id="squad-a-grid"></div>
+        </div>
+
+        <div class="card sc-card" style="margin-top:16px">
+          <div class="card-header">
+            <span class="card-icon" id="squad-b-flag">🇦🇺</span>
+            <span class="card-title" id="squad-b-name">AUSTRALIA SQUAD</span>
+          </div>
+          <div class="squad-grid" id="squad-b-grid"></div>
+        </div>
+
+      </div>
+    </div><!-- /tab-squad -->
+
+    <!-- ══════════════════════════════════════
+         CONTROLS BAR (always visible)
+    ══════════════════════════════════════ -->
+    <div class="controls-bar">
+      <button id="btn-start" class="ctrl-btn btn-start">▶ START MATCH</button>
+      <button id="btn-next"  class="ctrl-btn btn-next"  disabled>⏭ NEXT BALL</button>
+      <button id="btn-auto"  class="ctrl-btn btn-auto"  disabled>⚡ AUTO PLAY</button>
+      <button id="btn-pause" class="ctrl-btn btn-pause" disabled>⏸ PAUSE</button>
+      <button id="btn-reset" class="ctrl-btn btn-reset">↺ RESET</button>
+    </div>
+
+  </div><!-- /main-app -->
+
+  <!-- ══════════════════════════════════════
+       WINNER MODAL
+  ══════════════════════════════════════ -->
+  <div id="winner-modal" class="winner-overlay hidden">
+    <div class="winner-card" id="winner-card-inner">
+
+      <div class="winner-banner">
+        <div class="winner-sparkles">✨ &nbsp; ✨ &nbsp; ✨ &nbsp; ✨ &nbsp; ✨</div>
+        <div class="winner-flag-giant" id="winner-flag-giant">🏆</div>
+        <div class="winner-team-giant" id="winner-team-giant">WINNER</div>
+        <div class="winner-chips-row">
+          <span class="winner-chip">🏆 CHAMPIONS</span>
+          <span class="winner-chip">⭐ WINNERS</span>
+        </div>
+      </div>
+
+      <div class="winner-body">
+        <h2 class="winner-headline" id="winner-headline">MATCH RESULT</h2>
+        <p  class="winner-margin"   id="winner-margin"></p>
+        <div class="scorelines-box">
+          <div class="scoreline" id="scoreline-inn1"></div>
+          <div class="vs-divider">─── VS ───</div>
+          <div class="scoreline" id="scoreline-inn2"></div>
+        </div>
+        <div class="motm-card">
+          <div class="motm-badge">⭐ MAN OF THE MATCH</div>
+          <div class="motm-player" id="motm-player">—</div>
+          <div class="motm-stats"  id="motm-stats">—</div>
+        </div>
+        <button class="btn-toss btn-close-winner"
+          onclick="document.getElementById('winner-modal').classList.add('hidden')">
+          CLOSE ✕
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EVENT FLASH -->
+  <div id="event-flash" class="event-flash hidden">
+    <div class="flash-emoji" id="flash-emoji"></div>
+    <div class="flash-text"  id="flash-text"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
